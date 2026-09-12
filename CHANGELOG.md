@@ -2,6 +2,22 @@
 
 本项目版本号遵循 `0.x` 阶段的语义化：`0.<minor>.<patch>`；预发布版本带 `-beta.N` 后缀（面板中显示为 `0.1.1beta1`）。
 
+## v0.3.1 — 优化前后同屏对照 + 档位显示中文
+
+### 修复
+
+- **`.dpo-run-status` 的档位显示英文 id**：运行状态行（「档位 advanced · 已完成 · 首字 591ms」）用的是 `run.tier` 原始 id，而非 `TIERS` 的 label —— 同一屏的 `.dpo-overlay-src` 却已显示中文「发送：审查」，两者并列时明显割裂。同源问题还存在于优化完成通知：`showNotice("已按 " + run.tier + " 档优化结果发送")`。两处均改为 `((TIERS.find((x) => x.id === run.tier) || {}).label || run.tier)`，与 `.dpo-overlay-src` 的处理方式一致。
+
+### 改进
+
+- **「你的原文」提到结果之后，优化前后可同屏对照**：此前 `.dpo-orig{order:5}` 排在滚动区末位，而优化完成后用户的第一个动作往往就是「对照原文，确认有没有改坏、有没有丢关键信息」。真实 done 态量测：原文 `top 444`、textarea `bottom 204` → 相距 **240px**，`origVisibleNow = false`；必须滚动才能看到原文，而滚到原文时 textarea 已离开屏幕，无法对照。
+  调整顺序为 `元信息(1) → 结果(2) → 原文(3) → 思考(4) → 查证(5)` 后：原文 `top 220`、相距 **16px**、`origVisibleNow = true`，且原文完整落在首屏内（`orig.bottom 298 < clientH 393`）。
+
+### 实现要点
+
+- 只调整 CSS `order`，不动 DOM 结构（`.dpo-orig` 仍是 `.dpo-overlay-scroll` 的直接子级），因此不影响 `runPanes()` / `reviewPane()` 的任何渲染逻辑，也不触碰 `.dpo-review` 内部那三处 order 依赖。
+- 保留 `.dpo-run`（思考）与 `.dpo-trace`（查证）的相对次序：它们属于过程信息，排在结果与原文之后。
+
 ## v0.3.0 — 优化结果一键复制
 
 ### 新增
