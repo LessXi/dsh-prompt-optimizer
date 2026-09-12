@@ -2,6 +2,22 @@
 
 本项目版本号遵循 `0.x` 阶段的语义化：`0.<minor>.<patch>`；预发布版本带 `-beta.N` 后缀（面板中显示为 `0.1.1beta1`）。
 
+## v0.4.0 — 极端档只读查证接入真实路径（语义收窄）
+
+### 变更
+
+- **极端档语义收窄为「只读查证 · 仅用于消歧与校验」**：此前 `TIER_SPECS.extreme.system` 要求模型产出「分阶段执行计划」，并自行判断「这次任务是否值得让工作 AI 用 goal / todo / 计划模式跟踪」。计划工作属于 DSH 的 plan 模式，不该由提示词优化器代劳，这两项已从 system prompt 中移除；保留的是**命令结构固化**（要做什么／验收标准／硬约束／不许做什么）与**多情况预案**。
+  新增的边界四条：只用于消歧与校验；不得把查到的项目事实写成用户没提过的新要求、新验收项或新技术选型；与项目实际不符时写成让工作 AI 先确认的措辞；查不到就如实留空，也不为查而查。
+
+### 修复
+
+- **极端档的只读工具循环此前从未在真实用户路径上运行**：`executeLiveRun()` 调用 `streamWithTools()` 时第 5 个参数（`tools`）恒为字面量 `undefined`，而带工具循环的 `runToolLoop()` 只被自检专用的 `runVersion()` 调用。因此用户在界面上选「极端」后插件并不会读取项目，`.dpo-trace` 面板也永远显示「（暂无查证动作）」。现在 `executeLiveRun()` 在 `run.tier === 'extreme'` 时改走 `runToolLoop()`，以 `resolveSessionCwd(ctx)` 得到的工作区作为项目根，并把 `relayMessage()` 的产物直接作为消息数组传入。
+- **`opts.userText` 被重复包装**：`relayMessage()` 返回的本就是 `userMessageFor(...)` 的结果（消息数组），`runToolLoop()` 又对其调用一次 `userMessageFor()`，使指令正文被序列化成 `[object Object]` 送给模型（产物首句表现为「本次指令正文未收到有效内容（收到的是占位符 `[object Object]`）」）。现改为 `Array.isArray(opts.userText) ? opts.userText : userMessageFor(opts.userText)`，同时兼容自检路径的纯文本入参。
+
+### 改进
+
+- **查证过程实时可见**：`runToolLoop()` 新增 `onDelta` / `onReset` / `onTrace` 三个回调，经 `publishRun()` 推给前端 —— `onDelta` 透传流式增量，`onReset` 在多轮查证之间清空产出（否则各轮文本会拼接成最终结果），`onTrace` 每次工具调用后推送完整查证记录。前端 `es.onmessage` 新增 `text-reset` 与 `trace` 两个分支，`traceRows()` 改为优先读取 `store.run.trace`，探针通道的 `store.trace` 仅作兜底。
+- 档位文案同步：`hint` 由「反复查证，约 20 秒以上」改为「读项目消歧，约 20 秒以上」，`help` 由「读项目真实结构 → 分阶段行动计划 + 预案（约 20 秒）」改为「读项目真实情况，仅用于确认指代（约 20 秒）」；帮助面板推荐语同步更新。
 ## v0.3.1 — 优化前后同屏对照 + 档位显示中文
 
 ### 修复

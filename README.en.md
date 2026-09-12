@@ -100,11 +100,11 @@ node -e "console.log(require.resolve('@lessxi/dsh-prompt-optimizer',{paths:['<pr
 
 | Control | Values | Notes |
 |---|---|---|
-| **Tier** | Off / Basic / Advanced / Extreme | Off = no interception at all; Basic = just say it clearly (~3 s); Advanced = add the obviously-needed constraints and acceptance criteria (~20 s); Extreme = **read the real project structure** (read-only, never writes) and produce a staged action plan + acceptance criteria + contingencies (~20 s) |
+| **Tier** | Off / Basic / Advanced / Extreme | Off = no interception at all; Basic = just say it clearly (~3 s); Advanced = add the obviously-needed constraints and acceptance criteria (~20 s); Extreme = **read the real project** (read-only, never writes) purely to pin down vague references in your wording (~20 s) |
 | **Permission** | Review / Auto | Review = editable output, sent only when you confirm; Auto = sent as soon as optimization finishes (**and if optimization fails, the original text is sent** — it never silently swallows your message) |
 | **Model** | any provider/model | Affects optimization only, never your chat model; the popover marks the current session model; unreachable providers are labelled "unreachable" and never slow the list down |
 
-> **To use every capability automatically, use [Extreme] + [Auto].**
+> **To let it read the project and pin down vague references, then auto-send, use [Extreme] + [Auto].**
 
 ---
 
@@ -124,7 +124,7 @@ node -e "console.log(require.resolve('@lessxi/dsh-prompt-optimizer',{paths:['<pr
 | Symptom | Cause / fix |
 |---|---|
 | Enter seems to do nothing and the message is not sent | You are inside the optimization flow — watch the mini window; if it is not visible, switch to that session and it reappears |
-| Optimization is slow | Advanced/Extreme take about 20 s (Extreme also reads project structure). Use **Basic** for speed |
+| Optimization is slow | Advanced/Extreme take about 20 s (Extreme also does read-only project checks). Use **Basic** for speed |
 | "Optimizer model unavailable → sent the original text" | The selected model is unreachable (e.g. local `ollama` not running). The plugin **falls back to the session default model** automatically |
 | Temporarily disable it | Drag the **Tier** slider to the far left ("Off") |
 | A provider is labelled "unreachable" | That provider is unavailable right now (not running / no credentials); other models are unaffected |
@@ -153,7 +153,7 @@ If you used Option B, also delete the `insert` entry from `cordis.patch.yml`. Pl
 
 ## 8. Privacy and boundaries
 
-- Optimization requests send only **the text you typed**, plus (Advanced/Extreme) a **directory-tree summary and key file names of the current project**. Extreme-tier read-only checks are confined to the project root: no writes, no command execution.
+- Optimization requests send only **the text you typed** (regeneration also sends the previous draft and the direction); the **Extreme** tier additionally performs read-only checks (`read` / `glob` / `grep`) **inside your project root**, used only to disambiguate references — no writes, no command execution, no network.
 - The mini window sends nothing by default: only "Confirm", "Auto" and "Send as-is" hand content back to the official send path.
 - The plugin is a local client + host plugin and talks to no third-party service.
 
