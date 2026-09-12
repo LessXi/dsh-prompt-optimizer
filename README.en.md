@@ -2,6 +2,15 @@
 
 [中文](README.md) ｜ **English**
 
+> 🔀 **This is a fork by [`LessXi`](https://github.com/LessXi)** of [`WestFox-AwA/dsh-prompt-optimizer`](https://github.com/WestFox-AwA/dsh-prompt-optimizer) `v0.1.1-beta.1` (BSD-3-Clause). It is published as **`@lessxi/dsh-prompt-optimizer@0.2.0`** so both can be installed side by side.
+>
+> Changes are confined to **visual/interaction consistency with DSH itself** plus **several real upstream defects** (the tier/permission dropdown buttons never opened, the narrow-screen tier button opened the model list, a non-existent `--dsw-alias-bg-l1` token, the overlay scroll area squashing its children to 1px, …). See [CHANGELOG.md](CHANGELOG.md) for the full list. **All upstream features and design intent are preserved**; this fork is additive only.
+>
+> Install: `dsh plugin --profile web add -w 'github:LessXi/dsh-prompt-optimizer#main'`
+> For the upstream original: `github:WestFox-AwA/dsh-prompt-optimizer#v0.1.1-beta.1`.
+
+
+
 > 🌐 **UI language notice**: the plugin's **user interface is currently Chinese-only** — there is no English (or other) UI yet. This English README is documentation only; after installation the interface stays Chinese.
 > **界面语言说明**：本插件的操作界面目前有且只有中文。
 
@@ -37,11 +46,11 @@ Two steps: install the package into your profile, then register it as a bundle l
 
 ```bash
 # 1) install the package (GitHub repo / tarball / local dir all work)
-dsh plugin --profile web add github:WestFox-AwA/dsh-prompt-optimizer#v0.1.1-beta.1
+dsh plugin --profile web add -w 'github:LessXi/dsh-prompt-optimizer#main'
 dsh plugin --profile web add ./dsh-external-dsh-prompt-optimizer-0.1.1-beta.1.tgz
 
 # 2) add one line to dsh.profile.bundles in ~/.dsh/profiles/web/package.json:
-#      "@dsh-external/dsh-prompt-optimizer"
+#      "@lessxi/dsh-prompt-optimizer"
 ```
 
 Restart DSH and you are done. **Why the bundles edit is needed**: `dsh plugin` merely forwards its arguments to pnpm (installation only); which packages take part in assembly as bundle layers is decided by `dsh.profile.bundles`. This package ships its own `cordis.patch.yml` and inserts its entry into the root entry list during assembly — **exactly the same pattern** as `@dsh-external/dsh-super-injector` and `@dsh-external/dsh-graded-mode`.
@@ -52,7 +61,7 @@ Restart DSH and you are done. **Why the bundles edit is needed**: `dsh plugin` m
 # ~/.dsh/profiles/web/cordis.patch.yml (a top-level YAML array)
 - insert:
     - id: prompt-optimizer
-      name: '@dsh-external/dsh-prompt-optimizer'
+      name: '@lessxi/dsh-prompt-optimizer'
       config: {}
 ```
 
@@ -64,7 +73,7 @@ The package still has to be resolvable (`dsh plugin add`, or a manually created 
 
 ```bash
 dsh --dump-config --profile web | grep -A2 'id: prompt-optimizer'   # present, and exactly once
-node -e "console.log(require.resolve('@dsh-external/dsh-prompt-optimizer',{paths:['<profile dir>']}))"
+node -e "console.log(require.resolve('@lessxi/dsh-prompt-optimizer',{paths:['<profile dir>']}))"
 ```
 
 ### Requirements
@@ -126,7 +135,7 @@ node -e "console.log(require.resolve('@dsh-external/dsh-prompt-optimizer',{paths
 ## 6. Uninstall
 
 ```bash
-dsh plugin --profile web remove @dsh-external/dsh-prompt-optimizer
+dsh plugin --profile web remove @lessxi/dsh-prompt-optimizer
 ```
 
 If you used Option B, also delete the `insert` entry from `cordis.patch.yml`. Plugin settings live in `~/.dsh/prompt-optimizer.json` (tier / permission / model / window geometry / per-session settings); delete it too for a full cleanup.

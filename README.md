@@ -2,6 +2,15 @@
 
 **中文** ｜ [English](README.en.md)
 
+> 🔀 **这是 [`LessXi`](https://github.com/LessXi) 的 fork**：上游是 [`WestFox-AwA/dsh-prompt-optimizer`](https://github.com/WestFox-AwA/dsh-prompt-optimizer) 的 `v0.1.1-beta.1`（BSD-3-Clause），已改名为 **`@lessxi/dsh-prompt-optimizer@0.2.0`**，以便与上游并行安装、独立迭代。
+>
+> 相对上游的改动集中在**与 DSH 本身的视觉/交互一致性**与**若干上游真缺陷**（档位/发送下拉按钮点了打不开、窄屏档位按钮弹出模型列表、DSH 中不存在的 `--dsw-alias-bg-l1`、浮窗滚动区子项被压成 1px 等），完整清单见 [CHANGELOG.md](CHANGELOG.md)。**上游的功能与设计意图全部保留**，本 fork 只做增量。
+>
+> 安装：`dsh plugin --profile web add -w 'github:LessXi/dsh-prompt-optimizer#main'`
+> 想用上游原版请装 `github:WestFox-AwA/dsh-prompt-optimizer#v0.1.1-beta.1`。
+
+
+
 > 🌐 **界面语言说明**：本插件的**操作界面（UI）目前有且只有中文**，暂未提供英文或其他语言的界面。英文 README 仅用于介绍，安装后界面依然是中文。
 > *UI note: the plugin's user interface is currently **Chinese-only**. The English README is documentation only.*
 
@@ -37,11 +46,12 @@
 
 ```bash
 # 1) 装包（GitHub 仓库 / tarball / 本地目录都行）
-dsh plugin --profile web add github:WestFox-AwA/dsh-prompt-optimizer#v0.1.1-beta.1
-dsh plugin --profile web add ./dsh-external-dsh-prompt-optimizer-0.1.1-beta.1.tgz
+dsh plugin --profile web add -w 'github:LessXi/dsh-prompt-optimizer#main'
+# （上游发布的 tarball，不含本 fork 的改动）
+# dsh plugin --profile web add ./dsh-external-dsh-prompt-optimizer-0.1.1-beta.1.tgz
 
 # 2) 在 ~/.dsh/profiles/web/package.json 的 dsh.profile.bundles 里加一行：
-#      "@dsh-external/dsh-prompt-optimizer"
+#      "@lessxi/dsh-prompt-optimizer"
 ```
 
 重启 DSH 即生效。**为什么还要改 bundles**：`dsh plugin` 只是把参数转发给 pnpm（只负责安装），而"哪些包作为 bundle 层参与装配"由 profile 的 `dsh.profile.bundles` 决定。本插件自带 `cordis.patch.yml`，会在装配时把自己的 entry 插进根条目表 —— 与 `@dsh-external/dsh-super-injector`、`@dsh-external/dsh-graded-mode` **完全同一写法**。
@@ -54,7 +64,7 @@ dsh plugin --profile web add ./dsh-external-dsh-prompt-optimizer-0.1.1-beta.1.tg
 # ~/.dsh/profiles/web/cordis.patch.yml （顶层 YAML 数组）
 - insert:
     - id: prompt-optimizer
-      name: '@dsh-external/dsh-prompt-optimizer'
+      name: '@lessxi/dsh-prompt-optimizer'
       config: {}
 ```
 
@@ -66,7 +76,7 @@ dsh plugin --profile web add ./dsh-external-dsh-prompt-optimizer-0.1.1-beta.1.tg
 
 ```bash
 dsh --dump-config --profile web | grep -A2 'id: prompt-optimizer'   # 装配树里有它，且只有一条
-node -e "console.log(require.resolve('@dsh-external/dsh-prompt-optimizer',{paths:['<profile 目录>']}))"
+node -e "console.log(require.resolve('@lessxi/dsh-prompt-optimizer',{paths:['<profile 目录>']}))"
 ```
 
 ### 运行要求
@@ -128,7 +138,7 @@ node -e "console.log(require.resolve('@dsh-external/dsh-prompt-optimizer',{paths
 ## 六、卸载
 
 ```bash
-dsh plugin --profile web remove @dsh-external/dsh-prompt-optimizer
+dsh plugin --profile web remove @lessxi/dsh-prompt-optimizer
 ```
 
 若用"方式 B"安装，请同时删除 `cordis.patch.yml` 里那条 `insert`。插件设置存在 `~/.dsh/prompt-optimizer.json`（档位/权限/模型/迷你窗尺寸/按会话设置），如需彻底清理可一并删除。
