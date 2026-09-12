@@ -10,5 +10,5 @@
 # （与 @dsh-external/dsh-super-injector、@dsh-external/dsh-graded-mode 同一写法）。
 - insert:
     - id: prompt-optimizer
-      name: '@dsh-external/dsh-prompt-optimizer'
+      name: '@lessxi/dsh-prompt-optimizer'
       config: {}
