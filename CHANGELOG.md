@@ -2,6 +2,27 @@
 
 本项目版本号遵循 `0.x` 阶段的语义化：`0.<minor>.<patch>`；预发布版本带 `-beta.N` 后缀（面板中显示为 `0.1.1beta1`）。
 
+## v0.3.0 — 优化结果一键复制
+
+### 新增
+
+- **一键复制优化结果**：浮窗「检查后提交」标题行右侧新增「复制」按钮。优化结果通常数百字、且可能已被手工编辑，此前只能手动全选 —— 插件此前完全没有 clipboard 支持。
+
+### 实现要点
+
+- `copyResult(btn)`：优先 `navigator.clipboard.writeText`；被拒或不可用时回退 `document.execCommand("copy")`，回退前保存并恢复 textarea 的原选区。
+- 反馈：成功后按钮变「已复制」+ `data-copied="1"`（品牌色 12% 底 + 品牌色字），1.4s 后自动还原；失败显示「复制失败」。
+- 按钮置于 `.dpo-pane-title` 内部、`margin-left:auto` 顶到行尾。**没有包一层 wrapper**：`.dpo-review` 的直接子级被 order 规则依赖（`.dpo-review > .dpo-pane-title{order:2}`），加 wrapper 会一并破坏 `.dpo-regen-ask` / `.dpo-review-text` 的排序。
+- 样式遵循 DSH 控件语言（默认无边框无底色、hover 才浮出浅灰底）：`border:0`，起始色 `label-tertiary`，hover 用 `interactive-bg-hover`，成功态用 `state-business-primary` —— 全部为 DSH 语义 token，无硬编码色值。
+
+### 验证
+
+- 参数正确性（mock clipboard）：`capturedEqualsTextarea = true`
+- 真实 clipboard 路径：不抛异常、按钮进入「已复制」态
+- 1400ms 后自动还原
+- clipboard 被拒时确实走回退分支（`execCommand` 被执行）
+- computed style：`borderTop 0px`、`color rgb(129,133,140)`、`padding 4px 10px`、`margin-left:auto` 解析为 179.125px、按钮右缘与标题行右缘间距 0px
+
 ## v0.2.0 — fork（基于上游 v0.1.1-beta.1）
 
 > 🔀 本仓库是 [`LessXi/dsh-prompt-optimizer`](https://github.com/LessXi/dsh-prompt-optimizer)，上游为 [`WestFox-AwA/dsh-prompt-optimizer`](https://github.com/WestFox-AwA/dsh-prompt-optimizer) 的 `v0.1.1-beta.1`。包名改为 `@lessxi/dsh-prompt-optimizer`，可与上游并行安装。**上游的功能与设计意图全部保留**，以下均为增量。
