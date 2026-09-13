@@ -2,7 +2,7 @@
 
 [中文](README.md) ｜ **English**
 
-> 🔀 **This is a fork by [`LessXi`](https://github.com/LessXi)** of [`WestFox-AwA/dsh-prompt-optimizer`](https://github.com/WestFox-AwA/dsh-prompt-optimizer) `v0.1.1-beta.1` (BSD-3-Clause). It is published as **`@lessxi/dsh-prompt-optimizer`** (currently **0.4.31**) so both can be installed side by side.
+> 🔀 **This is a fork by [`LessXi`](https://github.com/LessXi)** of [`WestFox-AwA/dsh-prompt-optimizer`](https://github.com/WestFox-AwA/dsh-prompt-optimizer) `v0.1.1-beta.1` (BSD-3-Clause). It is published as **`@lessxi/dsh-prompt-optimizer`** (currently **0.4.32**) so both can be installed side by side.
 >
 > Changes are confined to **visual/interaction consistency with DSH itself** plus **several real upstream defects** (the tier/permission dropdown buttons never opened, the narrow-screen tier button opened the model list, a non-existent `--dsw-alias-bg-l1` token, the overlay scroll area squashing its children to 1px, …). See [CHANGELOG.md](CHANGELOG.md) for the full list. **All upstream features and design intent are preserved**; this fork is additive only.
 >
@@ -35,7 +35,7 @@ The moment you press Enter in the composer, your message is **not** sent directl
 - The mini window is **session-isolated**: a window triggered in A never pops up in B, and comes back as-is when you return to A (if it is still waiting for your decision).
 
 Upstream author: **啃轮胎的西狐** · upstream Version **0.1.1beta1** · Release date **2026/09/11**
-This fork: **[LessXi](https://github.com/LessXi)** · current version **0.4.31** (the upstream credit is still shown at the bottom of the in-plugin `?` panel)
+This fork: **[LessXi](https://github.com/LessXi)** · current version **0.4.32** (the upstream credit is still shown at the bottom of the in-plugin `?` panel)
 
 ---
 

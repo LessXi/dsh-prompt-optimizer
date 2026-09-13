@@ -2,6 +2,34 @@
 
 本项目版本号遵循 `0.x` 阶段的语义化：`0.<minor>.<patch>`；预发布版本带 `-beta.N` 后缀（面板中显示为 `0.1.1beta1`）。
 
+## v0.4.32 — 宿主失联不再让插件永久卡死（v152）
+
+### 修复
+
+- **宿主进程崩溃或重启后，插件会永久停在「优化中」并彻底不再拦截任何消息**：
+  `interceptAndOptimize` 把 `status === "connecting" || "running"` 视为 busy 并直接吞掉这次发送；
+  而 SSE 的 `onerror` 原为空实现（注释写「状态由事件决定」），宿主完全不可达时**永远不会再有事件到达**，
+  于是 `status` 停在 `running` ⇒ busy 永久为真 ⇒ 之后每一次 Enter / 发送都只弹「优化中 · 见浮窗」，
+  用户既不知道发生了什么，也没有任何出口。
+- **改为有界探活兜底**（零宿主端改动，复用已存在的 `GET /state` 作为探活端点）：
+  断线时最多重试 3 次（间隔 2200 / 4400 / 6600ms，累计约 13 秒）。
+  每次先看 `EventSource.readyState === 1` —— 已自动重连成功就不动状态，避免把长思考误判成失联；
+  否则探活 `/state`：宿主还活着且仍有重试额度就继续等待自动重连（重连后会补发 `snapshot` 或 `run-not-found`，交由既有分支处理）；
+  探不通、或已用完 3 次重试，就把本次运行判为 `error`，恢复「重试 / 默认模型重试 / 放行本条」三个出口。
+- **自动档保持 fail-open**：判失联时同样按原文把消息发出去（沿用既有的 `autoSend`），绝不静默吞掉用户的输入。
+- 新增常驻诊断 `run-host-lost`（白名单事件，不受 `debugEvidence` 门控）：记录 `tries` / `runId` / `permission`，便于事后取证。
+
+### 校验
+
+- 两阶段真机验证（模拟宿主不可达：把 `run.es` 换成 `readyState: 0` 的替身，并取出真实的 `onerror` 闭包调用）：
+  **宿主活着 ⇒ 不误判**（等待 3.45 秒后 `status` 仍为 `running`、`tries: 1`）；
+  **用完重试 ⇒ 判失联**（6.68 秒，与 2200×3 精确吻合；`status: "error"`、文案「无法连接优化服务 · 本次优化中断，可重试」、`tries: 3`）。
+- **核心判据**：`busy` 从 `true` 变为 `false` —— 即拦截功能恢复；错误态渲染出「重试 默认模型重试 放行本条」三个出口。
+- **零回归**：正常 run 仍为 `done`、`recoveryTries` 保持 0、`error: null`、done 态三按钮齐全；
+  自动档失联走 fail-open（`run` 被清空、浮窗关闭、提示「优化服务不可用 → 已按原文发出」）。
+- **英文界面**：`Cannot reach the optimization service — this run was interrupted; you can retry`，零中文残留，出口为 `Retry / Retry with default model / Send as-is`。
+- 白名单实测：evidence 中 `run-host-lost` 正常落盘，同时其余普通 beacon 一条未写（v141 门控仍生效）。
+
 ## v0.4.31 — 拦截提示可被屏幕阅读器播报（v151）
 
 ### 修复
