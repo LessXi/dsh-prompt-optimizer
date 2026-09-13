@@ -2,7 +2,7 @@
 
 [中文](README.md) ｜ **English**
 
-> 🔀 **This is a fork by [`LessXi`](https://github.com/LessXi)** of [`WestFox-AwA/dsh-prompt-optimizer`](https://github.com/WestFox-AwA/dsh-prompt-optimizer) `v0.1.1-beta.1` (BSD-3-Clause). It is published as **`@lessxi/dsh-prompt-optimizer@0.2.0`** so both can be installed side by side.
+> 🔀 **This is a fork by [`LessXi`](https://github.com/LessXi)** of [`WestFox-AwA/dsh-prompt-optimizer`](https://github.com/WestFox-AwA/dsh-prompt-optimizer) `v0.1.1-beta.1` (BSD-3-Clause). It is published as **`@lessxi/dsh-prompt-optimizer`** (currently **0.4.29**) so both can be installed side by side.
 >
 > Changes are confined to **visual/interaction consistency with DSH itself** plus **several real upstream defects** (the tier/permission dropdown buttons never opened, the narrow-screen tier button opened the model list, a non-existent `--dsw-alias-bg-l1` token, the overlay scroll area squashing its children to 1px, …). See [CHANGELOG.md](CHANGELOG.md) for the full list. **All upstream features and design intent are preserved**; this fork is additive only.
 >
@@ -11,8 +11,8 @@
 
 
 
-> 🌐 **UI language notice**: the plugin's **user interface is currently Chinese-only** — there is no English (or other) UI yet. This English README is documentation only; after installation the interface stays Chinese.
-> **界面语言说明**：本插件的操作界面目前有且只有中文。
+> 🌐 **UI language notice**: the plugin **follows the DSH interface language** (`zh` / `en`). With DSH in Chinese the plugin is Chinese; with DSH in English, the control row, dropdown menus, help panel, mini window and every notice switch to English (entries without a translation fall back to the Chinese source text). The language is read at runtime only — nothing is persisted and it never affects your conversation language.
+> **界面语言说明**：插件跟随 DSH 的界面语言（`zh` / `en`），控件行、下拉菜单、帮助面板、迷你窗与全部提示都会随之切换。
 
 ---
 
@@ -34,7 +34,8 @@ The moment you press Enter in the composer, your message is **not** sent directl
 - **Tier and permission are per-session**: setting session A to "Extreme + Auto" leaves session B untouched.
 - The mini window is **session-isolated**: a window triggered in A never pops up in B, and comes back as-is when you return to A (if it is still waiting for your decision).
 
-Author: **啃轮胎的西狐** · Version **0.1.1beta1** · Release date **2026/09/11** (the same credit appears at the bottom of the in-plugin `?` panel)
+Upstream author: **啃轮胎的西狐** · upstream Version **0.1.1beta1** · Release date **2026/09/11**
+This fork: **[LessXi](https://github.com/LessXi)** · current version **0.4.29** (the upstream credit is still shown at the bottom of the in-plugin `?` panel)
 
 ---
 
@@ -92,7 +93,7 @@ node -e "console.log(require.resolve('@lessxi/dsh-prompt-optimizer',{paths:['<pr
 4. With permission **Auto**: it is sent automatically as soon as optimization finishes — no action needed.
 5. Do not want to optimize? Click **‹ Roll back** (stop + close + **send nothing** + your original text stays in the composer), or **Send as-is** to send your original text.
 
-> The three controls left of the composer, from left to right: **Tier** (slider), **Permission** (slider), **Model** (pill), followed by **Help (`?`)**. The `?` panel contains the same short tutorial plus the author credit.
+> The three controls left of the composer, from left to right: **Tier** (dropdown), **Send** (dropdown), **Session default / model name** (dropdown), followed by **Help (`?`)**. All three menus are keyboard operable (↑ ↓ / Home / End wrap around, Enter selects, Esc closes and returns focus to the trigger), and the `?` panel contains the same short tutorial plus the credit.
 
 ---
 
@@ -126,9 +127,10 @@ node -e "console.log(require.resolve('@lessxi/dsh-prompt-optimizer',{paths:['<pr
 | Enter seems to do nothing and the message is not sent | You are inside the optimization flow — watch the mini window; if it is not visible, switch to that session and it reappears |
 | Optimization is slow | Advanced/Extreme take about 20 s (Extreme also does read-only project checks). Use **Basic** for speed |
 | "Optimizer model unavailable → sent the original text" | The selected model is unreachable (e.g. local `ollama` not running). The plugin **falls back to the session default model** automatically |
-| Temporarily disable it | Drag the **Tier** slider to the far left ("Off") |
+| Temporarily disable it | Open the **Tier** menu and pick "Off" |
 | A provider is labelled "unreachable" | That provider is unavailable right now (not running / no credentials); other models are unaffected |
-| Can I switch the UI to English? | **Not yet** — the UI is currently Chinese-only |
+| Can I switch the UI to English? | Yes. The plugin **follows the DSH interface language**: switch DSH to English and the whole plugin UI follows (control row, menus, help panel, mini window, notices). There is no separate language switch inside the plugin |
+| The result seems to ignore what we discussed above | References like "change that function above" need context. Make sure **Session context** is on in the **model menu** (on by default); when off, the plugin reads no history at all |
 
 ---
 
@@ -154,6 +156,8 @@ If you used Option B, also delete the `insert` entry from `cordis.patch.yml`. Pl
 ## 8. Privacy and boundaries
 
 - Optimization requests send only **the text you typed** (regeneration also sends the previous draft and the direction); the **Extreme** tier additionally performs read-only checks (`read` / `glob` / `grep`) **inside your project root**, used only to disambiguate references — no writes, no command execution, no network.
+- **Session context (on by default, can be turned off anytime)**: when enabled, the plugin also sends **the recent conversation of this session** (up to 6 turns) to the optimizer as disambiguation context, so references like "that function above" or "continue" resolve correctly. The prompt pins the boundary: fill in references only, never invent requirements, and the original text always wins on conflict. When off, **no history is read at all**. The switch lives in the **model menu**, and the mini-window meta row shows how many turns were used.
+- **No local diagnostic log by default**: typing, intercepting and switching tiers write nothing to disk and send no request; only uncaught errors and self-heal failures leave evidence. Logs record length, counts, status and fingerprints only — **never your input text** (path- and secret-like fragments are redacted), rotate at 2 MB keeping the two most recent generations, stay on this machine and are never uploaded. They can be cleared from the help panel.
 - The mini window sends nothing by default: only "Confirm", "Auto" and "Send as-is" hand content back to the official send path.
 - The plugin is a local client + host plugin and talks to no third-party service.
 
