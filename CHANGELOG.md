@@ -2,6 +2,54 @@
 
 本项目版本号遵循 `0.x` 阶段的语义化：`0.<minor>.<patch>`；预发布版本带 `-beta.N` 后缀（面板中显示为 `0.1.1beta1`）。
 
+## v0.4.33 — 状态持久化：隐私开关不再被静默回滚（v153）
+
+### 修复
+
+- **隐私开关会被静默回滚（本轮最重要的发现）**：`mirrorToSettings` 只镜像 `tier`/`permission`/`model`，
+  而设置 schema 还暴露 `useContext`/`debugEvidence` —— 它们在设置文档里永远停在 schema 默认值（`true`/`false`）。
+  v149 引入的反向同步 `settingsScope.watch()` 又把那个陈旧默认值当权威写回插件。实测后果：
+  用户在客户端关闭「会话背景」（隐私控制）之后，**只要再换一次档位，开关就被改回开启**。
+  修法是把镜像补全到 schema 暴露的每一个字段，并在 watch 侧忽略「自己刚推上去的那一次回声」。
+- **诊断取证开关会被任何一次日常操作关掉**：`savePluginState` 里 `debugEvidence: patch.debugEvidence === true`
+  与上一行 `useContext` 的写法不对称 —— 未携带该字段时不是「保留现值」而是「写成 false」；
+  而客户端的两条落盘路径都不携带它（`persistUi` 只发 `{ui}`；`persistState` 发 `{tier,permission,model,sessionId,useContext}`）。
+  于是拖动一次浮窗、或换一次档位，遥测就悄悄失效。已改为与 `useContext` 同构的条件保留。
+  同时，设置面板里的「诊断取证」此前**无人转发**（watch 回调不处理该字段），现已在反向同步中接上。
+- **状态写入侧没有白名单**：`tier`/`permission` 只在读侧校验，写侧直接落盘 ⇒ 实测 `POST {tier:"bogus"}`
+  确实把 `"bogus"` 写进文件，并且**经 `mirrorToSettings` 一起进了 DSH 设置文档**；读侧随后又把它静默修正成默认值，
+  于是文件、设置文档与实际行为三者互相矛盾。写侧现已按 `TIER_IDS`/`PERMISSION_IDS` 校验。
+- **模型选择可能在竞态中被清空**：客户端 apply 时 `store.modelSel` 的恢复被放在 `store.touched` 短路**之后** ——
+  用户若在 `/state` 返回前先改了档位，模型就不会被恢复，紧接着那次 `persistState` 会把已落盘的模型写成 `null`。
+  它是偏好而非档位值，已移到短路之前。
+- **追加纵深防御：值没变就不落盘**。实测曾一度观察到 **33 次/秒的空转写入**（12 秒内 revision +400，
+  且探测页面 3 秒内 0 次 `/state` 调用，确认是宿主端自循环）。根因依赖特定状态条件、事后不可复现，
+  因此改为按构造封堵：写前对全部持久化字段做归一化比较，完全相同则跳过落盘；
+  `settingsScope.watch` 侧再忽略「自己刚推上去的那次回声」。两层都加后，同一序列下空闲 15 秒零写入。
+
+### 校验
+
+- 写路径矩阵（真机，直接打 `/state`）：`persistUi` 形状之后 `debugEvidence` 保持 `true`（修复前为 `false`）；
+  `persistState` 形状之后保持 `true`（修复前 `false`）；关闭 `useContext` 后再换档位，值保持 `false`（修复前被改回 `true`）；
+  `{tier:"bogus", permission:"nonsense"}` 两个字段均不变（修复前 `tier` 落盘为 `"bogus"`）；
+  显式 `debugEvidence` 开/关均生效；几何变更仍落盘（430x360 → 520x400），相同值上报报 `skippedWrite: true` 且 revision 不动；
+  非法值被拒后 per-session 槽位仍正常写入。
+- 客户端端到端（真实 UI 点档位 → `setTier` → `persistState`）：`modelSel` 从落盘恢复、`useContext: false` 保持、
+  几何逐值恢复（520x400 @ 100,100）、`[data-dpo="a11y-status"]` 与 `role="status"` 在位；
+  把 `store.debugEvidence` 人为置回陈旧值后，一次真实点击在 **108ms** 内把它同步回来（无需刷新页面），
+  且模型与隐私设置都没有被连带清空。
+- 空闲写入检查：插件加载后 15 秒 revision 与 mtime 完全冻结；收尾复测 10 秒同样不变。
+- 损坏文件处理一并确认（结论是**没有缺陷**）：写入非 JSON 垃圾后 `GET /state` 不崩溃、回落默认值、
+  `readError` 报出精确解析错误；下一次保存即自愈并清空 `readError`。
+- `_sync.mjs` 五道门禁全绿（`i18n {calls:180, entries:172, ok:true, missing:[], unwrappedUi:[], shadows:[], deadEntries:[]}`）。
+
+### 说明
+
+- 状态文件是**跨实例共享**的：同一 `DSH_HOME` 下多个 `dsh web` 共用 `prompt-optimizer.json`。
+  不同代码版本的实例会互相覆盖 —— 实测 `debugEvidence` 在两个实例之间 True/False 摆动，
+  这解释了为什么旧实例存活时新写入可能被抹掉。
+- 宿主端有改动 ⇒ 需要一次 `dsh web` 重启才生效；客户端部分硬刷新即可。
+
 ## v0.4.32 — 宿主失联不再让插件永久卡死（v152）
 
 ### 修复

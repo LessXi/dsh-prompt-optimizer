@@ -2,7 +2,7 @@
 
 **中文** ｜ [English](README.en.md)
 
-> 🔀 **这是 [`LessXi`](https://github.com/LessXi) 的 fork**：上游是 [`WestFox-AwA/dsh-prompt-optimizer`](https://github.com/WestFox-AwA/dsh-prompt-optimizer) 的 `v0.1.1-beta.1`（BSD-3-Clause），已改名为 **`@lessxi/dsh-prompt-optimizer`**（当前 **0.4.32**），以便与上游并行安装、独立迭代。
+> 🔀 **这是 [`LessXi`](https://github.com/LessXi) 的 fork**：上游是 [`WestFox-AwA/dsh-prompt-optimizer`](https://github.com/WestFox-AwA/dsh-prompt-optimizer) 的 `v0.1.1-beta.1`（BSD-3-Clause），已改名为 **`@lessxi/dsh-prompt-optimizer`**（当前 **0.4.33**），以便与上游并行安装、独立迭代。
 >
 > 相对上游的改动集中在**与 DSH 本身的视觉/交互一致性**与**若干上游真缺陷**（档位/发送下拉按钮点了打不开、窄屏档位按钮弹出模型列表、DSH 中不存在的 `--dsw-alias-bg-l1`、浮窗滚动区子项被压成 1px 等），完整清单见 [CHANGELOG.md](CHANGELOG.md)。**上游的功能与设计意图全部保留**，本 fork 只做增量。
 >
@@ -35,7 +35,7 @@
 - 迷你窗**按会话隔离**：A 会话触发的窗，切到 B 不会冒出来；切回 A 若还挂着（等你决定）会原样回来。
 
 上游作者：**啃轮胎的西狐** · 上游版本 **0.1.1beta1** · 版本日期 **2026/09/11**
-本 fork：**[LessXi](https://github.com/LessXi)** · 当前版本 **0.4.32**（插件内 `?` 面板最底部也保留上游署名）
+本 fork：**[LessXi](https://github.com/LessXi)** · 当前版本 **0.4.33**（插件内 `?` 面板最底部也保留上游署名）
 
 ---
 
