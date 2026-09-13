@@ -1,6 +1,6 @@
 {
     "name": "@lessxi/dsh-prompt-optimizer",
-    "version": "0.4.28",
+    "version": "0.4.29",
     "description": "DSH Web 输入框接管：发送前用独立 AI 把提示词优化成可直接发给工作 AI 的命令（传话者语义、四档强度、审查/自动发送、可拖动改尺寸迷你窗、按会话隔离的档位与发送方式、优化结果一键复制、优化前后同屏对照、极端档只读查证仅用于消歧）",
     "type": "module",
     "main": "./lib/index.js",
