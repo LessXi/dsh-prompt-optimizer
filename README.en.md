@@ -2,7 +2,7 @@
 
 [中文](README.md) ｜ **English**
 
-> 🔀 **This is a fork by [`LessXi`](https://github.com/LessXi)** of [`WestFox-AwA/dsh-prompt-optimizer`](https://github.com/WestFox-AwA/dsh-prompt-optimizer) `v0.1.1-beta.1` (BSD-3-Clause). It is published as **`@lessxi/dsh-prompt-optimizer`** (currently **0.4.33**) so both can be installed side by side.
+> 🔀 **This is a fork by [`LessXi`](https://github.com/LessXi)** of [`WestFox-AwA/dsh-prompt-optimizer`](https://github.com/WestFox-AwA/dsh-prompt-optimizer) `v0.1.1-beta.1` (BSD-3-Clause). It is published as **`@lessxi/dsh-prompt-optimizer`** (currently **0.4.34**) so both can be installed side by side.
 >
 > Changes are confined to **visual/interaction consistency with DSH itself** plus **several real upstream defects** (the tier/permission dropdown buttons never opened, the narrow-screen tier button opened the model list, a non-existent `--dsw-alias-bg-l1` token, the overlay scroll area squashing its children to 1px, …). See [CHANGELOG.md](CHANGELOG.md) for the full list. **All upstream features and design intent are preserved**; this fork is additive only.
 >
@@ -35,7 +35,7 @@ The moment you press Enter in the composer, your message is **not** sent directl
 - The mini window is **session-isolated**: a window triggered in A never pops up in B, and comes back as-is when you return to A (if it is still waiting for your decision).
 
 Upstream author: **啃轮胎的西狐** · upstream Version **0.1.1beta1** · Release date **2026/09/11**
-This fork: **[LessXi](https://github.com/LessXi)** · current version **0.4.33** (the upstream credit is still shown at the bottom of the in-plugin `?` panel)
+This fork: **[LessXi](https://github.com/LessXi)** · current version **0.4.34** (the upstream credit is still shown at the bottom of the in-plugin `?` panel)
 
 ---
 
@@ -157,7 +157,7 @@ If you used Option B, also delete the `insert` entry from `cordis.patch.yml`. Pl
 
 - Optimization requests send only **the text you typed** (regeneration also sends the previous draft and the direction); the **Extreme** tier additionally performs read-only checks (`read` / `glob` / `grep`) **inside your project root**, used only to disambiguate references — no writes, no command execution, no network.
 - **Session context (on by default, can be turned off anytime)**: when enabled, the plugin also sends **the recent conversation of this session** (up to 6 turns) to the optimizer as disambiguation context, so references like "that function above" or "continue" resolve correctly. The prompt pins the boundary: fill in references only, never invent requirements, and the original text always wins on conflict. When off, **no history is read at all**. The switch lives in the **model menu**, and the mini-window meta row shows how many turns were used.
-- **No local diagnostic log by default**: typing, intercepting and switching tiers write nothing to disk and send no request; only uncaught errors and self-heal failures leave evidence. Logs record length, counts, status and fingerprints only — **never your input text** (path- and secret-like fragments are redacted), rotate at 2 MB keeping the two most recent generations, stay on this machine and are never uploaded. They can be cleared from the help panel.
+- **No local diagnostic log by default**: typing, intercepting and switching tiers write nothing to disk and send no request; only uncaught errors and self-heal failures leave evidence. Logs record length, counts, status and fingerprints only — **containing no fragments of your input**; a **diagnostics capture** switch at the bottom of the model menu (off by default) writes the first few dozen characters of your input and results to the local log for troubleshooting, and can be turned off at any time (path- and secret-like fragments are always redacted), rotate at 2 MB keeping the two most recent generations, stay on this machine and are never uploaded. They can be cleared from the help panel.
 - The mini window sends nothing by default: only "Confirm", "Auto" and "Send as-is" hand content back to the official send path.
 - The plugin is a local client + host plugin and talks to no third-party service.
 
