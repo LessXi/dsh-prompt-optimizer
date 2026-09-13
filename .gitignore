@@ -5,6 +5,9 @@ node_modules/
 *.bak*
 *.bak-*
 
+# 上游原版对照快照（BSD-3）：由 git show afadd35:lib/*.js 生成，仅供本地比对本 fork 的改动
+_orig/
+
 # 本机运行期遥测（体积大、含本机路径）：只把报告类文件留在仓库里
 evidence/backups/
 evidence/scaffold-backup/
